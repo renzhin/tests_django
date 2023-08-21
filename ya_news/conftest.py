@@ -77,3 +77,10 @@ def create_many_news():
 #     comment1.created = now + timedelta(days=1)
 #     comment2.created = now + timedelta(days=2)
 #     return comment1, comment2
+
+@pytest.fixture
+def form_data(news):
+    return {
+        'text': 'Новый текст',
+        'news': news,
+    }
