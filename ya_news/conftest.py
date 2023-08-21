@@ -1,7 +1,14 @@
 # conftest.py
 import pytest
 
+from datetime import datetime, timedelta
+
+from django.utils import timezone
+
 from news.models import News, Comment
+
+today = datetime.today()
+now = timezone.now()
 
 
 @pytest.fixture
@@ -32,3 +39,41 @@ def comment(author, news):
         text='Текст комментария',
     )
     return comment
+
+
+@pytest.fixture
+def create_many_news():
+
+    def _create_news(count):
+        for i in range(count):
+            News.objects.create(
+                text=f'Новость {i}',
+                date=today - timedelta(days=count)
+            )
+    return _create_news
+
+
+# @pytest.fixture
+# def create_many_comments():
+
+#     def _create_comments(count):
+#         for i in range(count):
+#             Comment.objects.create(
+#                 news=news,
+#                 author=author,
+#                 text=f'Текст комментария {i}',
+#             )
+#             comment.created = now + timedelta(days=count)
+#     return _create_comments
+
+# @pytest.fixture
+# def create_two_comments(news, author):
+#     comment1 = Comment.objects.create(
+#         news=news, author=author, text='Комментарий 1'
+#     )
+#     comment2 = Comment.objects.create(
+#         news=news, author=author, text='Комментарий 2'
+#     )
+#     comment1.created = now + timedelta(days=1)
+#     comment2.created = now + timedelta(days=2)
+#     return comment1, comment2
