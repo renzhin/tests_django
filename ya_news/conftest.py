@@ -18,14 +18,22 @@ def author(django_user_model):
 
 
 @pytest.fixture
-def author_client(author, client):  # Вызываем фикстуру автора и клиента.
-    client.force_login(author)  # Логиним автора в клиенте.
+def author_client(author, client):
+    client.force_login(author)
     return client
 
 
 @pytest.fixture
 def news():
-    news = News.objects.create(  # Создаём объект заметки.
+    news = News.objects.create(
+        text='Текст заметки',
+    )
+    return news
+
+
+@pytest.fixture
+def news2():
+    news = News.objects.create(
         text='Текст заметки',
     )
     return news
@@ -36,7 +44,7 @@ def comment(author, news):
     comment = Comment.objects.create(
         news=news,
         author=author,
-        text='Текст комментария',
+        text='Текст комментария ля ля',
     )
     return comment
 
@@ -53,30 +61,20 @@ def create_many_news():
     return _create_news
 
 
-# @pytest.fixture
-# def create_many_comments():
+@pytest.fixture
+def create_many_comments():
 
-#     def _create_comments(count):
-#         for i in range(count):
-#             Comment.objects.create(
-#                 news=news,
-#                 author=author,
-#                 text=f'Текст комментария {i}',
-#             )
-#             comment.created = now + timedelta(days=count)
-#     return _create_comments
+    def _create_comments(count, author, news2):
+        for i in range(count):
+            comment = Comment.objects.create(
+                news=news2,
+                author=author,
+                text=f'Текст комментария {i}',
+            )
+            comment.created = now + timedelta(days=i)
+            comment.save()
+    return _create_comments
 
-# @pytest.fixture
-# def create_two_comments(news, author):
-#     comment1 = Comment.objects.create(
-#         news=news, author=author, text='Комментарий 1'
-#     )
-#     comment2 = Comment.objects.create(
-#         news=news, author=author, text='Комментарий 2'
-#     )
-#     comment1.created = now + timedelta(days=1)
-#     comment2.created = now + timedelta(days=2)
-#     return comment1, comment2
 
 @pytest.fixture
 def form_data(news):

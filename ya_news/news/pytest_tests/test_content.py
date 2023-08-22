@@ -45,35 +45,15 @@ def test_authorized_client_has_form(admin_client, news):
     assert 'form' in response.context
 
 
-# @pytest.mark.django_db
-# def test_comments_order(client, news):
-#     url = reverse('news:detail', args=(news.id,))
-#     response = client.get(url)
-#     # Проверяем, что объект новости находится в словаре контекста
-#     # под ожидаемым именем - названием модели.
-#     assert 'news' in response.context
-#     # Получаем объект новости.
-#     news = response.context['news']
-#     # Получаем все комментарии к новости.
-#     all_comments = news.comment_set.all()
-#     print("Number of comments:", news.comment_set.count())
-#     # Проверяем, что время создания первого комментария в списке
-#     # меньше, чем время создания второго.
-#     assert all_comments[0].created < all_comments[1].created
-
-
-# @pytest.mark.django_db
-# def test_comments_order(client, news, create_many_comments):
-#     create_many_comments(2)
-#     url = reverse('news:detail', args=(news.id,))
-#     response = client.get(url)
-#     # Проверяем, что объект новости находится в словаре контекста
-#     # под ожидаемым именем - названием модели.
-#     assert 'news' in response.context
-#     # Получаем объект новости.
-#     news = response.context['news']
-#     # Получаем все комментарии к новости.
-#     all_comments = news.comment_set.all()
-#     # Проверяем, что время создания первого комментария в списке
-#     # меньше, чем время создания второго.
-#     assert all_comments[0].created < all_comments[1].created
+@pytest.mark.django_db
+def test_comments_order(client, create_many_comments, author, news2):
+    create_many_comments(2, author, news2)
+    url = reverse('news:detail', args=(news2.id,))
+    response = client.get(url)
+    assert 'news' in response.context
+    news = response.context['news']
+    # Получаем все комментарии к новости.
+    all_comments = news.comment_set.all()
+    # Проверяем, что время создания первого комментария в списке
+    # меньше, чем время создания второго.
+    assert all_comments[0].created < all_comments[1].created
