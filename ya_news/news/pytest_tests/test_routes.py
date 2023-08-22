@@ -20,7 +20,7 @@ def test_pages_availability_for_anonymous_user(client, url_without_id):
 
 
 @pytest.mark.django_db
-def test_detail_pagefor_anonymous_user(client, news):
+def test_detail_page_for_anonymous_user(client, news):
     url = reverse('news:detail', args=(news.id,))
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
