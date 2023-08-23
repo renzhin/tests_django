@@ -1,10 +1,14 @@
-# test_content.py
 import pytest
 
 from django.conf import settings
 from django.urls import reverse
 
 
+@pytest.mark.parametrize(
+    'name, args',
+    ('news:home', None),
+    ('notes:edit', pytest.lazy_fixture('slug_for_args'))
+)
 @pytest.mark.django_db
 def test_max_news_on_home_page(client, create_many_news):
     create_many_news(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
@@ -19,11 +23,8 @@ def test_max_news_on_home_page(client, create_many_news):
 def test_news_order(client):
     response = client.get(reverse('news:home'))
     object_list = response.context['object_list']
-    # Получаем даты новостей в том порядке, как они выведены на странице.
     all_dates = [news.date for news in object_list]
-    # Сортируем полученный список по убыванию.
     sorted_dates = sorted(all_dates, reverse=True)
-    # Проверяем, что исходный список был отсортирован правильно.
     assert all_dates == sorted_dates
 
 
@@ -34,10 +35,7 @@ def test_comments_order(client, create_many_comments, author, news2):
     response = client.get(url)
     assert 'news' in response.context
     news = response.context['news']
-    # Получаем все комментарии к новости.
     all_comments = news.comment_set.all()
-    # Проверяем, что время создания первого комментария в списке
-    # меньше, чем время создания второго.
     assert all_comments[0].created < all_comments[1].created
 
 

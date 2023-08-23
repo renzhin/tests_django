@@ -1,4 +1,3 @@
-# test_logic.py
 from http import HTTPStatus
 
 import pytest
