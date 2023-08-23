@@ -1,12 +1,12 @@
-import pytest
-
 from datetime import datetime, timedelta
 
+import pytest
+
+from django.urls import reverse
 from django.utils import timezone
 
-from news.models import News, Comment
 from news.forms import BAD_WORDS
-
+from news.models import Comment, News
 
 today = datetime.today()
 now = timezone.now()
@@ -81,3 +81,38 @@ def bad_words_data():
     return {
         'text': f'Какой-то текст, {BAD_WORDS[0]}, еще текст'
     }
+
+
+@pytest.fixture
+def url_home():
+    return reverse('news:home')
+
+
+@pytest.fixture
+def url_logout():
+    return reverse('users:logout')
+
+
+@pytest.fixture
+def url_signup():
+    return reverse('users:signup')
+
+
+@pytest.fixture
+def news_id(news):
+    return news.id,
+
+
+@pytest.fixture
+def url_detail_news(news_id):
+    return reverse('news:detail', args=news_id)
+
+
+@pytest.fixture
+def url_edit_news(news_id):
+    return reverse('news:edit', args=news_id)
+
+
+@pytest.fixture
+def url_delete_news(news_id):
+    return reverse('news:delete', args=news_id)

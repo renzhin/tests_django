@@ -1,19 +1,12 @@
 import pytest
 
 from django.conf import settings
-from django.urls import reverse
-
-HOME_URL = reverse('news:home')
-
-
-def get_news_detail_url(news_id):
-    return reverse('news:detail', args=(news_id,))
 
 
 @pytest.mark.django_db
-def test_max_news_on_home_page(client, create_many_news):
+def test_max_news_on_home_page(client, create_many_news, url_home):
     create_many_news(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
-    response = client.get(HOME_URL)
+    response = client.get(url_home)
     assert response.status_code == 200
     assert len(
         response.context['news_list']
@@ -21,8 +14,8 @@ def test_max_news_on_home_page(client, create_many_news):
 
 
 @pytest.mark.django_db
-def test_news_order(client):
-    response = client.get(HOME_URL)
+def test_news_order(client, url_home):
+    response = client.get(url_home)
     object_list = response.context['object_list']
     all_dates = [news.date for news in object_list]
     sorted_dates = sorted(all_dates, reverse=True)
@@ -30,10 +23,15 @@ def test_news_order(client):
 
 
 @pytest.mark.django_db
-def test_comments_order(client, create_many_comments, author, news):
+def test_comments_order(
+    client,
+    create_many_comments,
+    author,
+    news,
+    url_detail_news
+):
     create_many_comments(10, author, news)
-    url = get_news_detail_url(news.id)
-    response = client.get(url)
+    response = client.get(url_detail_news)
     object_list = response.context['news'].comment_set.all()
     all_dates = [comment.created for comment in object_list]
     sorted_dates = sorted(all_dates, reverse=False)
@@ -41,14 +39,18 @@ def test_comments_order(client, create_many_comments, author, news):
 
 
 @pytest.mark.django_db
-def test_anonymous_client_has_no_form(client, news):
-    url = get_news_detail_url(news.id)
-    response = client.get(url)
+def test_anonymous_client_has_no_form(
+    client,
+    url_detail_news,
+):
+    response = client.get(url_detail_news)
     assert 'form' not in response.context
 
 
 @pytest.mark.django_db
-def test_authorized_client_has_form(admin_client, news):
-    url = get_news_detail_url(news.id)
-    response = admin_client.get(url)
+def test_authorized_client_has_form(
+    admin_client,
+    url_detail_news,
+):
+    response = admin_client.get(url_detail_news)
     assert 'form' in response.context

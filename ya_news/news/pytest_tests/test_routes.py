@@ -1,39 +1,35 @@
-import pytest
-
 from http import HTTPStatus
 
-from django.urls import reverse
+import pytest
 
+from django.conf import settings
 from pytest_django.asserts import assertRedirects
 
 
-@pytest.fixture
-def id_for_args(news):
-    return news.id,
-
-
 @pytest.mark.parametrize(
-    'name, args',
+    'url',
     (
-        ('news:home', None),
-        ('users:login', None),
-        ('users:logout', None),
-        ('users:signup', None),
-        ('news:detail', pytest.lazy_fixture('id_for_args')),
+        pytest.lazy_fixture('url_home'),
+        settings.LOGIN_URL,
+        pytest.lazy_fixture('url_logout'),
+        pytest.lazy_fixture('url_signup'),
+        pytest.lazy_fixture('url_detail_news'),
     )
 )
 @pytest.mark.django_db
 def test_pages_and_detail_availability_for_anonymous_user(
-    client, name, args
+    client, url
 ):
-    url = reverse(name, args=args)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
 
 
 @pytest.mark.parametrize(
-    'url_with_id',
-    ('news:delete', 'news:edit')
+    'url',
+    (
+        pytest.lazy_fixture('url_delete_news'),
+        pytest.lazy_fixture('url_edit_news')
+    )
 )
 @pytest.mark.parametrize(
     'parametrized_client, expected_status',
@@ -43,20 +39,21 @@ def test_pages_and_detail_availability_for_anonymous_user(
     ),
 )
 def test_comment_edit_and_delete(
-        parametrized_client, url_with_id, comment, expected_status
+        parametrized_client, url, comment, expected_status
 ):
-    url = reverse(url_with_id, args=(comment.id,))
     response = parametrized_client.get(url)
     assert response.status_code == expected_status
 
 
 @pytest.mark.parametrize(
-    'url_with_id',
-    ('news:delete', 'news:edit')
+    'url',
+    (
+        pytest.lazy_fixture('url_delete_news'),
+        pytest.lazy_fixture('url_edit_news')
+    )
 )
-def test_redirects_for_anonymous_user(client, url_with_id, comment):
-    login_url = reverse('users:login')
-    url = reverse(url_with_id, args=(comment.id,))
-    expected_url = f'{login_url}?next={url}'
+@pytest.mark.django_db
+def test_redirects_for_anonymous_user(client, url, comment):
+    expected_url = f'{settings.LOGIN_URL}?next={url}'
     response = client.get(url)
     assertRedirects(response, expected_url)
