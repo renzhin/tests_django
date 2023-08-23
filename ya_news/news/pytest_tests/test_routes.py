@@ -7,20 +7,26 @@ from django.urls import reverse
 from pytest_django.asserts import assertRedirects
 
 
+@pytest.fixture
+def id_for_args(news):
+    return news.id,
+
+
 @pytest.mark.parametrize(
-    'url_without_id',
-    ('news:home', 'users:login', 'users:logout', 'users:signup')
+    'name, args',
+    (
+        ('news:home', None),
+        ('users:login', None),
+        ('users:logout', None),
+        ('users:signup', None),
+        ('news:detail', pytest.lazy_fixture('id_for_args')),
+    )
 )
 @pytest.mark.django_db
-def test_pages_availability_for_anonymous_user(client, url_without_id):
-    url = reverse(url_without_id)
-    response = client.get(url)
-    assert response.status_code == HTTPStatus.OK
-
-
-@pytest.mark.django_db
-def test_detail_page_for_anonymous_user(client, news):
-    url = reverse('news:detail', args=(news.id,))
+def test_pages_and_detail_availability_for_anonymous_user(
+    client, name, args
+):
+    url = reverse(name, args=args)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
 

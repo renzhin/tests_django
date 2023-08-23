@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 
 from news.models import News, Comment
+from news.forms import BAD_WORDS
+
 
 today = datetime.today()
 now = timezone.now()
@@ -23,14 +25,6 @@ def author_client(author, client):
 
 @pytest.fixture
 def news():
-    news = News.objects.create(
-        text='Текст заметки',
-    )
-    return news
-
-
-@pytest.fixture
-def news2():
     news = News.objects.create(
         text='Текст заметки',
     )
@@ -62,14 +56,14 @@ def create_many_news():
 @pytest.fixture
 def create_many_comments():
 
-    def _create_comments(count, author, news2):
+    def _create_comments(count, author, news):
         for i in range(count):
             comment = Comment.objects.create(
-                news=news2,
+                news=news,
                 author=author,
                 text=f'Текст комментария {i}',
             )
-            comment.created = now + timedelta(days=i)
+            comment.created = now + timedelta(days=i + 1)
             comment.save()
     return _create_comments
 
@@ -79,4 +73,11 @@ def form_data(news):
     return {
         'text': 'Новый текст',
         'news': news,
+    }
+
+
+@pytest.fixture
+def bad_words_data():
+    return {
+        'text': f'Какой-то текст, {BAD_WORDS[0]}, еще текст'
     }
