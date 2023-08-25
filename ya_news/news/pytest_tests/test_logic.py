@@ -1,7 +1,6 @@
 from http import HTTPStatus
 
 import pytest
-
 from pytest_django.asserts import assertFormError, assertRedirects
 
 from news.forms import WARNING
@@ -17,7 +16,7 @@ def test_user_can_create_comment(
 ):
     initial_comment_count = Comment.objects.filter(news=news).count()
     response = author_client.post(url_detail_news, data=form_data)
-    assert response.status_code == 302
+    assert response.status_code == HTTPStatus.FOUND
     assertRedirects(response, f'{url_detail_news}#comments')
     new_comment_count = Comment.objects.filter(news=news).count()
     assert new_comment_count == initial_comment_count + 1

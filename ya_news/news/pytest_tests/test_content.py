@@ -1,7 +1,6 @@
 from http import HTTPStatus
 
 import pytest
-
 from django.conf import settings
 
 
