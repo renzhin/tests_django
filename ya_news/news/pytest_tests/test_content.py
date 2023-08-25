@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import pytest
 
 from django.conf import settings
@@ -7,7 +9,7 @@ from django.conf import settings
 def test_max_news_on_home_page(client, create_many_news, url_home):
     create_many_news(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
     response = client.get(url_home)
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert len(
         response.context['news_list']
     ) == settings.NEWS_COUNT_ON_HOME_PAGE

@@ -13,12 +13,12 @@ class TestRoutes(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.author1 = User.objects.create(username='Лев Толстой')
-        cls.author2 = User.objects.create(username='Анна Петрова')
+        cls.author = User.objects.create(username='Лев Толстой')
+        cls.reader = User.objects.create(username='Анна Петрова')
         cls.notes1 = Note.objects.create(
             title='Заметка1',
             text='Текст2',
-            author=cls.author1,
+            author=cls.author,
         )
         cls.HOME_URL = reverse('notes:home')
         cls.LOGIN_URL = reverse('users:login')
@@ -31,50 +31,37 @@ class TestRoutes(TestCase):
         cls.NOTE_EDIT_URL = reverse('notes:edit', args=(cls.notes1.slug,))
         cls.NOTE_DETAIL_URL = reverse('notes:detail', args=(cls.notes1.slug,))
 
-    def test_pages_availability_for_anonymous_client(self):
+    def test_pages_availability_for_different_users(self):
+        users = (self.author, self.reader, None)
         urls = (
-            self.HOME_URL,
-            self.LOGIN_URL,
-            self.LOGOUT_URL,
-            self.SIGNUP_URL,
+            (self.NOTE_LIST_URL, self.reader),
+            (self.NOTE_ADD_URL, self.reader),
+            (self.NOTE_SUCCESS_URL, self.reader),
+            (self.NOTE_DELETE_URL, self.author),
+            (self.NOTE_EDIT_URL, self.author),
+            (self.NOTE_DETAIL_URL, self.author),
+            (self.HOME_URL, None),
+            (self.LOGIN_URL, None),
+            (self.LOGOUT_URL, None),
+            (self.SIGNUP_URL, None),
         )
-        for name in urls:
-            with self.subTest(name=name):
-                response = self.client.get(name)
-                self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_availability_for_notes_modify(self):
-        urls = (
-            self.NOTE_DELETE_URL,
-            self.NOTE_EDIT_URL,
-            self.NOTE_DETAIL_URL,
-        )
-        users_statuses = (
-            (self.author1, HTTPStatus.OK),
-            (self.author2, HTTPStatus.NOT_FOUND),
-        )
-        for user, status in users_statuses:
-            self.client.force_login(user)
-            for name in urls:
-                with self.subTest(user=user, name=name):
-                    response = self.client.get(name)
-                    self.assertEqual(response.status_code, status)
-
-    def test_availability_for_notes_list_and_success(self):
-        urls = (
-            self.NOTE_LIST_URL,
-            self.NOTE_ADD_URL,
-            self.NOTE_SUCCESS_URL,
-        )
-        users_statuses = (
-            (self.author1, HTTPStatus.OK),
-        )
-        for user, status in users_statuses:
-            self.client.force_login(user)
-            for name in urls:
-                with self.subTest(user=user, name=name):
-                    response = self.client.get(name)
-                    self.assertEqual(response.status_code, status)
+        for user in users:
+            if user:
+                self.client.force_login(user)
+            for url, access in urls:
+                with self.subTest(user=user, url=url, access=access):
+                    response = self.client.get(url)
+                    if user == self.author:
+                        expected_status = HTTPStatus.OK
+                    elif user == self.reader and access != self.author:
+                        expected_status = HTTPStatus.OK
+                    elif user == self.reader and access == self.author:
+                        expected_status = HTTPStatus.NOT_FOUND
+                    elif user is None and access is None:
+                        expected_status = HTTPStatus.OK
+                    elif user is None and access in (self.author, self.reader):
+                        expected_status = HTTPStatus.FOUND
+                    self.assertEqual(response.status_code, expected_status)
 
     def test_redirect_for_anonymous_client(self):
         urls = (

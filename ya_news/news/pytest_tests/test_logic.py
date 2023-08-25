@@ -9,11 +9,11 @@ from news.models import Comment
 
 
 def test_user_can_create_comment(
-        author_client,
-        news,
-        author,
-        url_detail_news,
-        form_data
+    author_client,
+    news,
+    author,
+    url_detail_news,
+    form_data
 ):
     initial_comment_count = Comment.objects.filter(news=news).count()
     response = author_client.post(url_detail_news, data=form_data)
