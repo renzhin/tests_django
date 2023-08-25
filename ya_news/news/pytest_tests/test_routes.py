@@ -5,15 +5,23 @@ import pytest
 from django.conf import settings
 from pytest_django.asserts import assertRedirects
 
+URL_HOME = pytest.lazy_fixture('url_home')
+URL_LOGOUT = pytest.lazy_fixture('url_logout')
+URL_SIGNUP = pytest.lazy_fixture('url_signup')
+URL_DETAIL = pytest.lazy_fixture('url_detail_news')
+URL_LOGIN = settings.LOGIN_URL
+URL_DELETE_NEWS = pytest.lazy_fixture('url_delete_news')
+URL_EDIT_NEWS = pytest.lazy_fixture('url_edit_news')
+
 
 @pytest.mark.parametrize(
     'url',
     (
-        pytest.lazy_fixture('url_home'),
-        settings.LOGIN_URL,
-        pytest.lazy_fixture('url_logout'),
-        pytest.lazy_fixture('url_signup'),
-        pytest.lazy_fixture('url_detail_news'),
+        URL_HOME,
+        URL_LOGIN,
+        URL_LOGOUT,
+        URL_SIGNUP,
+        URL_DETAIL,
     )
 )
 @pytest.mark.django_db
@@ -27,8 +35,8 @@ def test_pages_and_detail_availability_for_anonymous_user(
 @pytest.mark.parametrize(
     'url',
     (
-        pytest.lazy_fixture('url_delete_news'),
-        pytest.lazy_fixture('url_edit_news')
+        URL_DELETE_NEWS,
+        URL_EDIT_NEWS,
     )
 )
 @pytest.mark.parametrize(
@@ -48,12 +56,12 @@ def test_comment_edit_and_delete(
 @pytest.mark.parametrize(
     'url',
     (
-        pytest.lazy_fixture('url_delete_news'),
-        pytest.lazy_fixture('url_edit_news')
+        URL_DELETE_NEWS,
+        URL_EDIT_NEWS,
     )
 )
 @pytest.mark.django_db
 def test_redirects_for_anonymous_user(client, url, comment):
-    expected_url = f'{settings.LOGIN_URL}?next={url}'
+    expected_url = f'{URL_LOGIN}?next={url}'
     response = client.get(url)
     assertRedirects(response, expected_url)
