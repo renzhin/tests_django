@@ -1,14 +1,13 @@
 from http import HTTPStatus
 
-from pytils.translit import slugify
-
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from pytils.translit import slugify
 
 from notes.forms import WARNING
-
 from notes.models import Note
+
 
 User = get_user_model()
 
@@ -21,15 +20,15 @@ class TestLogic(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.author1 = User.objects.create(username='Лев Толстой')
-        cls.author2 = User.objects.create(username='Клифорд Саймак')
+        cls.author = User.objects.create(username='Лев Толстой')
+        cls.reader = User.objects.create(username='Клифорд Саймак')
         cls.auth_client = Client()
-        cls.auth_client.force_login(cls.author1)
+        cls.auth_client.force_login(cls.author)
         cls.note1 = Note.objects.create(
             title='Тестовый заголовок',
             text='Содержимое заметки',
             slug=cls.NOTE_NEW_SLUG,
-            author=cls.author1
+            author=cls.author
         )
         cls.form_data = {
             'title': cls.NOTE_TITLE,
@@ -65,7 +64,7 @@ class TestLogic(TestCase):
         note_for_test = Note.objects.latest('id')
         self.assertEqual(note_for_test.title, self.NOTE_TITLE)
         self.assertEqual(note_for_test.text, self.NOTE_TEXT)
-        self.assertEqual(note_for_test.author, self.author1)
+        self.assertEqual(note_for_test.author, self.author)
 
     def test_empty_slug(self):
         self.form_data.pop('slug')
@@ -100,7 +99,7 @@ class TestLogic(TestCase):
         self.assertEqual(self.note1.slug, self.form_data['slug'])
 
     def test_other_user_cant_edit_note(self):
-        self.client.force_login(self.author2)
+        self.client.force_login(self.reader)
         response = self.client.post(self.NOTE_EDIT_URL, self.form_data)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         note_from_db = Note.objects.get(id=self.note1.id)
@@ -115,7 +114,7 @@ class TestLogic(TestCase):
         self.assertEqual(self.notes_count_before, notes_count_after + 1)
 
     def test_other_user_cant_delete_note(self):
-        self.client.force_login(self.author2)
+        self.client.force_login(self.reader)
         response = self.client.post(self.NOTE_DELETE_URL)
         notes_count_after = Note.objects.count()
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)

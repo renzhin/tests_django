@@ -15,7 +15,7 @@ class TestRoutes(TestCase):
     def setUpTestData(cls):
         cls.author = User.objects.create(username='Лев Толстой')
         cls.reader = User.objects.create(username='Анна Петрова')
-        cls.notes1 = Note.objects.create(
+        cls.note1 = Note.objects.create(
             title='Заметка1',
             text='Текст2',
             author=cls.author,
@@ -27,9 +27,9 @@ class TestRoutes(TestCase):
         cls.NOTE_LIST_URL = reverse('notes:list')
         cls.NOTE_ADD_URL = reverse('notes:add')
         cls.NOTE_SUCCESS_URL = reverse('notes:success')
-        cls.NOTE_DELETE_URL = reverse('notes:delete', args=(cls.notes1.slug,))
-        cls.NOTE_EDIT_URL = reverse('notes:edit', args=(cls.notes1.slug,))
-        cls.NOTE_DETAIL_URL = reverse('notes:detail', args=(cls.notes1.slug,))
+        cls.NOTE_DELETE_URL = reverse('notes:delete', args=(cls.note1.slug,))
+        cls.NOTE_EDIT_URL = reverse('notes:edit', args=(cls.note1.slug,))
+        cls.NOTE_DETAIL_URL = reverse('notes:detail', args=(cls.note1.slug,))
 
     def test_pages_availability_for_different_users(self):
         users = (self.author, self.reader, None)
