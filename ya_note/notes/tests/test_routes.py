@@ -10,14 +10,18 @@ User = get_user_model()
 
 
 class TestRoutes(TestCase):
+    NOTE_TITLE = 'Тестовый заголовок'
+    NOTE_TEXT = 'Содержимое заметки'
+    USERNAME_AUTHOR = 'Лев Толстой'
+    USERNAME_READER = 'Клифорд Саймак'
 
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create(username='Лев Толстой')
-        cls.reader = User.objects.create(username='Анна Петрова')
+        cls.author = User.objects.create(username=cls.USERNAME_AUTHOR)
+        cls.reader = User.objects.create(username=cls.USERNAME_READER)
         cls.note1 = Note.objects.create(
-            title='Заметка1',
-            text='Текст2',
+            title=cls.NOTE_TITLE,
+            text=cls.NOTE_TEXT,
             author=cls.author,
         )
         cls.HOME_URL = reverse('notes:home')
