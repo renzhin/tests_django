@@ -132,3 +132,9 @@ python manage.py migrate
 ```
 python manage.py runserver
 ```
+
+### Пример заполнения файла с переменными окружения.env:
+````
+SECRET_KEY=django-insecure-1234567891011121223321231232323232321323
+ALLOWED_HOSTS='11.22.33.44 127.0.0.1 localhost domain.name'
+````
